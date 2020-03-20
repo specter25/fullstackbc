@@ -1,5 +1,5 @@
 const Block=require('./block')
-const cryptoHash= require('./crypto-hash');
+const cryptoHash= require('../util/crypto-hash');
 
 class Blockchain{
     constructor()
@@ -24,13 +24,16 @@ class Blockchain{
         {
             const block=chain[i];
             const lastBlock=chain[i-1];
-            const {timestamp ,lastHash ,hash ,data} =block;
-            const present=cryptoHash(timestamp,lastHash,data);
+            const lastDifficulty=lastBlock.difficulty;
+            const actualDifficulty=block.difficulty;
+            const {timestamp ,lastHash ,hash ,data ,nonce ,difficulty} =block;
+            const present=cryptoHash(timestamp,lastHash,data ,nonce , difficulty);
             if(lastHash !== lastBlock.hash || hash !== present   )
             {
                 console.log('entered')
                 return false;
             }
+            if(Math.abs(lastDifficulty-actualDifficulty)>1) return false;
         }
         return true;
     }
