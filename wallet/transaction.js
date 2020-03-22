@@ -5,14 +5,16 @@ const {verifySignature}=require('../util/index')
 class Transaction{
     constructor({senderWallet ,amount ,recepient})
     {
+        amount=JSON.parse(amount);
         this.id=uuid();
         this.outputMap=this.createOutputMap({senderWallet ,amount ,recepient});
         this.input=this.createInput({senderWallet,outputMap :this.outputMap});
     }
     createOutputMap({senderWallet ,amount ,recepient})
     {
+
         const outputMap={};
-        outputMap[recepient]=amount;
+        outputMap[recepient]=JSON.parse(amount);
         outputMap[senderWallet.publicKey]=senderWallet.balance -amount;
 
         return outputMap;
@@ -46,6 +48,7 @@ class Transaction{
     update({senderWallet,recepient,amount})
 
     {
+        amount=JSON.parse(amount);
         if(amount > this.outputMap[senderWallet.publicKey])
         {
             throw new Error('amount exceedes balance');
@@ -55,7 +58,7 @@ class Transaction{
             this.outputMap[recepient]=amount;
         }
         else{
-            this.outputMap[recepient] +=amount;
+            this.outputMap[recepient] = this.outputMap[recepient] + amount;
         }
 
 
