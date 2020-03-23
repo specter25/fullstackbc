@@ -5,6 +5,7 @@ const request=require('request')
 const app=express();
 const TransactionPool=require('./wallet/transaction-pool');
 const Wallet =require('./wallet/index');
+const TransactionMiner=require('./app/transaction-miner')
 
 
 //variables
@@ -16,6 +17,7 @@ const bc=new Blockchain();
 const transactionPool=new TransactionPool();
 const wallet =new Wallet();
 const pubsub=new PubSub({blockchain:bc ,transactionPool});
+const transactionMiner=new TransactionMiner({blockchain:bc, transactionPool,wallet,pubsub});
 
 
 //apply middleware
@@ -56,6 +58,7 @@ try {
      
 
 } catch (error) {
+    console.log(error);
     return res.status(400).json({type:"error", message:error.message});
 }
 
@@ -69,6 +72,11 @@ try {
 
 app.get('/api/transaction-pool-map',(req,res)=>{
     res.json(transactionPool.transactionMap);
+})
+
+app.get('/api/mine-transactions',(req,res)=>{
+    transactionMiner.mineTransaction();
+    res.redirect('/api/blocks');
 })
 
 

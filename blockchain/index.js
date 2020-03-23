@@ -38,7 +38,7 @@ class Blockchain{
         return true;
     }
 
-    replaceChain(newChain)
+    replaceChain(newChain ,onSuccess)
     {
         if(newChain.length<= this.chain.length)
         {
@@ -50,7 +50,7 @@ class Blockchain{
             console.log('invalid chain');
             return;
         }
-
+        if(onSuccess) onSuccess();
         console.log('chain replaced');
         this.chain=newChain;
     }
