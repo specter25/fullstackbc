@@ -1,4 +1,4 @@
-const uuid=require('uuid/v1');
+const { v4: uuid} = require('uuid');
 const Wallet=require('./index');
 const {verifySignature}=require('../util/index');
 const {MINING_REWARD ,REWARD_INPUT} =require('../config');

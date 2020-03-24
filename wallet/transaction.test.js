@@ -4,8 +4,10 @@ const {verifySignature}=require('../util/index')
 const {MINING_REWARD ,REWARD_INPUT} =require('../config');
 
 describe('transaction', () => {
-    let transaction , senderWallet,recepient , amount;
+    let transaction , senderWallet,recepient , amount ,logMock;
     beforeEach(()=>{
+        logMock=jest.fn();
+        global.console.log=logMock;
         senderWallet=new Wallet();
         amount=50;
         recepient='receiver-public-key';

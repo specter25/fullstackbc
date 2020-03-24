@@ -50,7 +50,7 @@ app.post('/api/transact',(req,res)=>{
 try {
     if(transaction)
     {
-        transaction.update({senderWallet:wallet ,recepient ,amount});
+        transaction.update({senderWallet:wallet ,recepient ,amount , chain:bc.chain});
     }
     else{
         transaction=wallet.createTransaction({amount,recepient});
@@ -79,6 +79,12 @@ app.get('/api/mine-transactions',(req,res)=>{
     res.redirect('/api/blocks');
 })
 
+
+app.get('/api/wallet-info',(req,res)=>{
+    res.json({address:wallet.publicKey,
+             balance:Wallet.calculateBalance({chain:bc.chain ,address:wallet.publicKey})
+    })
+})
 
 
 

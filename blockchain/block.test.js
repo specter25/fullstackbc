@@ -5,6 +5,13 @@ const {cryptoHash}=require('../util/index');
 
 
 describe('block',()=>{
+
+
+    let logMock;
+    beforeEach(()=>{
+        logMock=jest.fn();
+        global.console.log=logMock;
+    }) 
     const timestamp=2000;
     const data=['blockchain','data'];
     const lastHash='foo-hash';
@@ -26,10 +33,14 @@ describe('block',()=>{
 
 
     describe('genesis',()=>{
+        let logMock;
+        beforeEach(()=>{
+            logMock=jest.fn();
+            global.console.log=logMock;
+        }) 
+
 
         const genesisBlock= Block.genesis();
-
-        console.log('genesisBlock', genesisBlock);
         
         it('is a instance of block',()=>{
             expect(genesisBlock instanceof Block).toBe(true);
@@ -40,6 +51,12 @@ describe('block',()=>{
 
     })
     describe('minedBlock',()=>{
+
+        let logMock;
+        beforeEach(()=>{
+            logMock=jest.fn();
+            global.console.log=logMock;
+        }) 
         lastBlock=Block.genesis();
         minedBlock=Block.mineBlock({lastBlock,data});
         it('is a instance of block',()=>{
@@ -72,16 +89,21 @@ describe('block',()=>{
 
     })
     describe('adjust difficulty', () => {
+        let logMock;
+        beforeEach(()=>{
+            logMock=jest.fn();
+            global.console.log=logMock;
+        }) 
 
 
 
         it('inc the diff for a quickly mined block',()=>{
-            // console.log(block.timestamp);
-            // console.log(block.difficulty);
+            console.log(block.timestamp);
+            console.log(block.difficulty);
             expect(Block.adjustDifficulty({originalBlock:block , timestamp:block.timestamp +MINE_RATE -100})).toEqual(block.difficulty+1);
         })
         it('dec the diff for a slowly mined block',()=>{
-            // console.log(block.difficulty);
+            console.log(block.difficulty);
             expect(Block.adjustDifficulty({originalBlock:block , timestamp:block.timestamp +MINE_RATE +100})).toEqual(block.difficulty-1);
         });
         it('sets the lower limit as 1',()=>{

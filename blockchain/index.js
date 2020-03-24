@@ -30,7 +30,6 @@ class Blockchain{
             const present=cryptoHash(timestamp,lastHash,data ,nonce , difficulty);
             if(lastHash !== lastBlock.hash || hash !== present   )
             {
-                console.log('entered')
                 return false;
             }
             if(Math.abs(lastDifficulty-actualDifficulty)>1) return false;

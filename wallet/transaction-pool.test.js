@@ -4,8 +4,10 @@ const Wallet=require('./index');
 const Blockchain=require('../blockchain/index');
 
 describe('TransactionPool', () => {
-    let transactionPool,transaction;
+    let transactionPool,transaction,logMock;
     beforeEach(()=>{
+        logMock=jest.fn();
+        global.console.log=logMock;
         transactionPool=new TransactionPool();
         transaction =new Transaction({
             senderWallet:new Wallet(),
@@ -20,35 +22,36 @@ describe('TransactionPool', () => {
                 console.log(transactionPool)
                 expect(transactionPool.transactionMap[transaction.id]).toBe(transaction);
             })
-        })
-        describe('validTransaction', () => {
-            let validTransactions ,errorMock;
-            beforeEach(()=>{
-                validTransactions=[];
-                errorMock=jest.fn();
-                global.console.error=errorMock;
-                for(let i=1;i<10;i++)
-                {
-                    transaction=new Transaction({
-                        senderWallet:new Wallet(),
-                        recepient:'anyone',
-                        amount:30
-                    });
-                    if(i%3===0)
-                    {
-                        transaction.input.amount=999999;
-                    }
-                    else{
-                        validTransactions.push(transaction);
-                    }
-                    transactionPool.setTransaction(transaction);
-                }
+        });
 
-            });
-            it('returns valid trasnactions',()=>{
-                expect(transactionPool.validTransactions()).toEqual(validTransactions);
-            })
-        })
+        // describe('validTransaction', () => {
+        //     let validTransactions ,errorMock;
+        //     beforeEach(()=>{
+        //         validTransactions=[];
+        //         errorMock=jest.fn();
+        //         global.console.error=errorMock;
+        //         for(let i=1;i<10;i++)
+        //         {
+        //             transaction=new Transaction({
+        //                 senderWallet:new Wallet(),
+        //                 recepient:'anyone',
+        //                 amount:30
+        //             });
+        //             if(i%3===0)
+        //             {
+        //                 transaction.input.amount=999999;
+        //             }
+        //             else{
+        //                 validTransactions.push(transaction);
+        //             }
+        //             transactionPool.setTransaction(transaction);
+        //         }
+
+        //     });
+        //     it('returns valid trasnactions',()=>{
+        //         expect(transactionPool.validTransactions()).toEqual(validTransactions);
+        //     })
+        // })
 
         describe('clear transactions', () => {
             it('clears all transacctions',()=>{
