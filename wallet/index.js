@@ -63,5 +63,9 @@ class Wallet{
 
         return hasConductedTransaction? outputsTotal : STARTING_BALANCE+outputsTotal;
     }
+    static validTran(transaction)
+    {
+       return Transaction.validTransaction(transaction);
+    }
 }
 module.exports =Wallet;

@@ -1,7 +1,8 @@
 const {cryptoHash}=require('../util/index')
 const Blockchain=require('.');
 const Block=require('./block');
-
+const Wallet=require('../wallet/index');
+const Transaction =require('../wallet/transaction');
 
 describe('Blockchain',()=>{
     let blockchain ,newChain,originalChain;
@@ -139,9 +140,99 @@ describe('Blockchain',()=>{
                     expect(blockchain.chain).toEqual(newChain.chain)
                 })
             })
+            describe('flag is true', () => {
+                it('calls the validateTransactionsfunction',()=>{
+                    const mock=jest.fn();
+                    blockchain.validTransactionData=mock;
+                    newChain.addBlock({data:'foo'});
+                    blockchain.replaceChain(newChain.chain,true);
+                    expect(mock).toHaveBeenCalled();
+                })
+            })
+            
+
         })
         
         
     })
+
+
+    describe('validTransactions', () => {
+        let transaction,rewardTransaction ,wallet;
+
+
+        describe('transactionisvalid',()=>{
+
+            beforeEach(()=>{
+                wallet=new Wallet();
+                transaction=wallet.createTransaction({recepient:'foo',amount:100});
+                rewardTransaction=Transaction.rewardTransaction({miningWallet:wallet});
+            }) ;
+
+            it('returns true',()=>{
+
+                newChain.addBlock({data:[transaction,rewardTransaction]});
+                expect(blockchain.validTransactionData({chain:newChain.chain})).toBe(true);
+            });
+
+            describe('and transaction has multiple rewards', () => {
+                it('returns false',()=>{
+                    newChain.addBlock({data:[transaction,rewardTransaction,rewardTransaction]});
+                    expect(blockchain.validTransactionData({chain:newChain.chain})).toBe(false);
+                })
+            })
+            describe('and the transaction has a tampered outut map', () => {
+                describe('and the transaction is a non reward transaction', () => {
+                    it('returns false',()=>{
+
+                        transaction.outputMap[wallet.publicKey]=999999;
+                        newChain.addBlock({data:[transaction,rewardTransaction]});
+                        expect(blockchain.validTransactionData({chain:newChain.chain})).toBe(false);
+                    })
+                });
+                describe('and the transaction is a reward transaction', () => {
+                    it('returns false',()=>{
+                        rewardTransaction.outputMap[wallet.publicKey]=999999;
+                        newChain.addBlock({data:[transaction,rewardTransaction]});
+                        expect(blockchain.validTransactionData({chain:newChain.chain})).toBe(false);
+                    })
+                })
+                
+                
+            })
+            describe('and the transaction has a tampered input field', () => {
+                it('returns false and logs an error',()=>{
+                    wallet.balance=9000;
+                    const evilOutputMap={
+                        [wallet.publicKey]:8900,
+                        foo:100
+                    }
+                    const evilTransaction={
+                        input:{
+                            timestamp:Date.now(),
+                            amount:wallet.balance,
+                            address:wallet.publicKey,
+                            signature:wallet.sign(evilOutputMap)
+                        },
+                        outputMap:evilOutputMap
+                    }
+                    newChain.addBlock({data:[evilTransaction,rewardTransaction]});
+                        expect(blockchain.validTransactionData({chain:newChain.chain})).toBe(false);
+
+                })
+            })
+            describe('and the block conatins multiple imput transactions', () => {
+                it('returns false and logs error',()=>{
+                    newChain.addBlock({data:[transaction,transaction ,transaction]});
+                    expect(blockchain.validTransactionData({chain:newChain.chain})).toBe(false);
+                })
+            })
+            
+            
+            
+            
+        })
+    })
+    
 
     });
