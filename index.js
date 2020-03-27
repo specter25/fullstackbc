@@ -7,6 +7,8 @@ const TransactionPool=require('./wallet/transaction-pool');
 const Wallet =require('./wallet/index');
 const TransactionMiner=require('./app/transaction-miner')
 
+const path=require('path');
+
 
 //variables
 const DEFAULT_PORT = 3000;
@@ -22,6 +24,12 @@ const transactionMiner=new TransactionMiner({blockchain:bc, transactionPool,wall
 
 //apply middleware
 app.use(express.json({ extended: false }));
+
+
+
+app.use(express.static(path.join(__dirname ,'client/dist')));
+
+
 
 
 //routes
@@ -86,6 +94,51 @@ app.get('/api/wallet-info',(req,res)=>{
     })
 })
 
+app.get('*',(req,res)=>{
+    res.sendFile(path.join(__dirname , './client/dist/index.html'));
+})
+
+
+//just for dev purposes of frontend
+const walletFoo=new Wallet();
+const walletBar=new Wallet();
+
+const generateWalletTransaction=({wallet,recepient,amount})=>{
+    const transaction=wallet.createTransaction({
+        recepient,amount,chain:bc.chain
+    });
+    transactionPool.setTransaction(transaction);
+}
+
+const walletAction=()=>{
+    generateWalletTransaction({wallet , recepient:walletFoo.publicKey , amount:5});
+}
+const walletFooAction=()=>{
+    generateWalletTransaction({wallet:walletFoo , recepient:walletBar.publicKey , amount:10});
+}
+const walletBarAction=()=>{
+    generateWalletTransaction({wallet:walletBar , recepient:wallet.publicKey , amount:7});
+}
+
+for(let i=0;i<10;i++)
+{
+    if(i%3==0)
+    {
+        walletAction();
+        walletFooAction();
+    }
+    else if(i%3==1)
+    {
+        walletAction();
+        walletBarAction();
+    }
+    else
+    {
+        walletBarAction();
+        walletFooAction();
+    }
+    transactionMiner.mineTransaction();
+}
 
 
 
