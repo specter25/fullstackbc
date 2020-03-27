@@ -9,6 +9,7 @@ const TransactionMiner=require('./app/transaction-miner')
 
 const path=require('path');
 
+// const isDevelopement=process.env.ENV ==='developement'
 
 //variables
 const DEFAULT_PORT = 3000;
@@ -93,11 +94,42 @@ app.get('/api/wallet-info',(req,res)=>{
              balance:Wallet.calculateBalance({chain:bc.chain ,address:wallet.publicKey})
     })
 })
+app.get('/api/known-addresses',(req,res)=>{
+    let addressMap;
+    for(let block of bc.chain)
+    {
+        for(let transaction of block.data)
+        {
+            const recepient =Object.keys(transaction.outputMap);
+            recepient.forEach(recipient => addressMap[recipient]=recipient);
+        }
+        res.json(Object.keys(addressMap));
+    }
+});
+
+app.get('/api/blocks/length',(req,res)=>{
+    res.json(bc.chain.length);
+});
+app.get('/api/blocks/:id',(req,res)=>{
+    const {id}=req.params;
+    const length=bc.chain.length;
+    const blocksReversed=bc.chain.slice().reverse();
+    let startIndex=(id-1)*5;
+    let endIndex=id*5;
+    startIndex=startIndex<length? startIndex :length;
+    endIndex=endIndex<length? endIndex :length;
+
+    res.json(blocksReversed.slice(startIndex,endIndex));
+    
+})
+
 
 app.get('*',(req,res)=>{
     res.sendFile(path.join(__dirname , './client/dist/index.html'));
 })
 
+// if(isDevelopement)
+// {
 
 //just for dev purposes of frontend
 const walletFoo=new Wallet();
@@ -141,6 +173,7 @@ for(let i=0;i<10;i++)
 }
 
 
+// }
 
 
 //functions
